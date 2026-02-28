@@ -120,16 +120,60 @@
     .image-preview {
       margin-top: 16px;
       display: none;
-      text-align: center;
     }
 
     .image-preview.show { display: block; }
 
-    .image-preview img {
-      max-width: 100%;
-      max-height: 300px;
+    .preview-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .preview-item {
+      position: relative;
+      width: calc(50% - 5px);
       border-radius: 8px;
       border: 1px solid #334155;
+      overflow: hidden;
+      background: #0f172a;
+    }
+
+    .preview-item img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .preview-item .btn-remove-img {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 24px;
+      height: 24px;
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 14px;
+      line-height: 24px;
+      text-align: center;
+      cursor: pointer;
+      padding: 0;
+      transition: all 0.2s;
+    }
+
+    .preview-item .btn-remove-img:hover {
+      background: #ef4444;
+      transform: scale(1.1);
+    }
+
+    .preview-count {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 8px;
+      text-align: center;
     }
 
     /* Analyze Button */
@@ -1023,16 +1067,21 @@
       <h2>อัพโหลดสลิปการชาร์จ</h2>
       <div class="upload-area" id="uploadArea">
         <div class="upload-icon">📸</div>
-        <p>แตะเพื่อถ่ายรูปหรือเลือกรูปสลิป</p>
-        <input type="file" id="fileInput" accept="image/*">
+        <p>แตะเพื่อถ่ายรูปหรือเลือกรูปสลิป (เลือกได้หลายรูป)</p>
+        <input type="file" id="fileInput" accept="image/*" multiple>
       </div>
 
       <div class="image-preview" id="imagePreview">
-        <img id="previewImg" src="" alt="Preview">
+        <div class="preview-gallery" id="previewGallery"></div>
+        <div class="preview-count" id="previewCount"></div>
       </div>
 
       <button class="btn-analyze" id="btnAnalyze" onclick="analyzeSlip()">
         วิเคราะห์สลิป
+      </button>
+
+      <button class="btn-analyze" id="btnAddMore" onclick="document.getElementById('fileInput').click()" style="background:linear-gradient(135deg,#334155,#475569);display:none;">
+        + เพิ่มรูปอีก
       </button>
 
       <!-- Scanning Animation -->
@@ -1045,6 +1094,7 @@
         </div>
         <ul class="scan-steps">
           <li class="scan-step" id="scanStep1"><span class="scan-step-icon"></span> กำลังอ่านรูปสลิป...</li>
+
           <li class="scan-step" id="scanStep2"><span class="scan-step-icon"></span> AI กำลังวิเคราะห์ข้อมูล...</li>
           <li class="scan-step" id="scanStep3"><span class="scan-step-icon"></span> ดึงข้อมูลออกจากสลิป...</li>
           <li class="scan-step" id="scanStep4"><span class="scan-step-icon"></span> กำลังจัดรูปแบบผลลัพธ์...</li>
@@ -1221,7 +1271,7 @@
     let remoteConfig = null;
     let currentUser = null;
     let allCharges = [];
-    let currentImageBase64 = null;
+    let currentImagesBase64 = [];
     let config = {};
     let remoteKeys = { openRouterKey: '', aiModel: '' };
 
@@ -1377,25 +1427,54 @@
         e.preventDefault();
         uploadArea.classList.remove('dragover');
         if (e.dataTransfer.files.length) {
-          fileInput.files = e.dataTransfer.files;
-          handleFile({ target: fileInput });
+          handleFile({ target: { files: e.dataTransfer.files } });
         }
       });
     }
 
     function handleFile(e) {
-      const file = e.target.files[0];
-      if (!file) return;
+      const files = Array.from(e.target.files);
+      if (!files.length) return;
 
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        currentImageBase64 = ev.target.result;
-        document.getElementById('previewImg').src = currentImageBase64;
-        document.getElementById('imagePreview').classList.add('show');
-        document.getElementById('btnAnalyze').classList.add('show');
-        document.getElementById('analysisResult').classList.remove('show');
-      };
-      reader.readAsDataURL(file);
+      document.getElementById('analysisResult').classList.remove('show');
+
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          currentImagesBase64.push(ev.target.result);
+          renderPreviewGallery();
+          document.getElementById('imagePreview').classList.add('show');
+          document.getElementById('btnAnalyze').classList.add('show');
+          document.getElementById('btnAddMore').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      });
+      // Reset file input so the same file can be added again
+      if (e.target && e.target.value !== undefined) {
+        e.target.value = '';
+      }
+    }
+
+    function renderPreviewGallery() {
+      const gallery = document.getElementById('previewGallery');
+      gallery.innerHTML = currentImagesBase64.map((src, idx) => `
+        <div class="preview-item">
+          <img src="${src}" alt="Preview ${idx + 1}">
+          <button class="btn-remove-img" onclick="removeImage(${idx})" title="ลบรูปนี้">&times;</button>
+        </div>
+      `).join('');
+      document.getElementById('previewCount').textContent = currentImagesBase64.length + ' รูป';
+    }
+
+    function removeImage(idx) {
+      currentImagesBase64.splice(idx, 1);
+      if (currentImagesBase64.length === 0) {
+        document.getElementById('imagePreview').classList.remove('show');
+        document.getElementById('btnAnalyze').classList.remove('show');
+        document.getElementById('btnAddMore').style.display = 'none';
+        document.getElementById('fileInput').value = '';
+      }
+      renderPreviewGallery();
     }
 
     // ─── OpenRouter AI Analysis ───
@@ -1406,7 +1485,7 @@
         return;
       }
 
-      if (!currentImageBase64) {
+      if (currentImagesBase64.length === 0) {
         showToast('กรุณาเลือกรูปสลิปก่อน', true);
         return;
       }
@@ -1438,7 +1517,7 @@
                 content: [
                   {
                     type: 'text',
-                    text: `วิเคราะห์สลิปการชาร์จรถไฟฟ้านี้ และส่งข้อมูลกลับเป็น JSON เท่านั้น ไม่ต้องมี markdown หรือข้อความอื่น
+                    text: `วิเคราะห์สลิปการชาร์จรถไฟฟ้า${currentImagesBase64.length > 1 ? 'จากรูปทั้งหมด ' + currentImagesBase64.length + ' รูป รวมข้อมูลจากทุกรูปเข้าด้วยกัน' : 'นี้'} และส่งข้อมูลกลับเป็น JSON เท่านั้น ไม่ต้องมี markdown หรือข้อความอื่น
 ตอบเป็น JSON format นี้เท่านั้น:
 {
   "date": "YYYY-MM-DD",
@@ -1450,10 +1529,10 @@
 }
 ถ้าไม่มีข้อมูลไหนให้ใส่ null สำหรับ string และ 0 สำหรับ number`
                   },
-                  {
+                  ...currentImagesBase64.map(imgBase64 => ({
                     type: 'image_url',
-                    image_url: { url: currentImageBase64 }
-                  }
+                    image_url: { url: imgBase64 }
+                  }))
                 ]
               }
             ]
@@ -1488,6 +1567,7 @@
         btn.disabled = false;
         btn.textContent = 'วิเคราะห์สลิป';
         btn.classList.add('show');
+        document.getElementById('btnAddMore').style.display = 'none';
       }
     }
 
@@ -1582,11 +1662,14 @@
         showToast('บันทึกข้อมูลสำเร็จ');
 
         // Reset form
-        currentImageBase64 = null;
+        currentImagesBase64 = [];
         document.getElementById('imagePreview').classList.remove('show');
         document.getElementById('btnAnalyze').classList.remove('show');
+        document.getElementById('btnAddMore').style.display = 'none';
         document.getElementById('analysisResult').classList.remove('show');
         document.getElementById('fileInput').value = '';
+        document.getElementById('previewGallery').innerHTML = '';
+        document.getElementById('previewCount').textContent = '';
 
         // Reload
         loadCharges();
