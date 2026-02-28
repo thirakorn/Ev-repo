@@ -168,6 +168,149 @@
     .btn-analyze:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3); }
     .btn-analyze:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+    /* Scanning Overlay */
+    .scan-overlay {
+      display: none;
+      margin-top: 16px;
+      padding: 24px;
+      background: #0f172a;
+      border-radius: 12px;
+      border: 1px solid #22d3ee;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scan-overlay.show { display: block; }
+
+    .scan-overlay::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.03), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .scan-visual {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 20px;
+    }
+
+    .scan-ring {
+      position: absolute;
+      inset: 0;
+      border: 3px solid transparent;
+      border-top-color: #22d3ee;
+      border-radius: 50%;
+      animation: scan-spin 1.2s linear infinite;
+    }
+
+    .scan-ring:nth-child(2) {
+      inset: 10px;
+      border-top-color: #06b6d4;
+      animation-duration: 1.8s;
+      animation-direction: reverse;
+    }
+
+    .scan-ring:nth-child(3) {
+      inset: 20px;
+      border-top-color: #0891b2;
+      animation-duration: 2.4s;
+    }
+
+    @keyframes scan-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .scan-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2rem;
+      animation: scan-pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes scan-pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      50% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.7; }
+    }
+
+    .scan-steps {
+      list-style: none;
+      text-align: left;
+      max-width: 260px;
+      margin: 0 auto;
+    }
+
+    .scan-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 0;
+      font-size: 0.85rem;
+      color: #334155;
+      transition: all 0.4s;
+    }
+
+    .scan-step.active {
+      color: #22d3ee;
+    }
+
+    .scan-step.done {
+      color: #10b981;
+    }
+
+    .scan-step-icon {
+      width: 20px;
+      text-align: center;
+      font-size: 0.75rem;
+    }
+
+    .scan-step.active .scan-step-icon::after {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border: 2px solid #22d3ee;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: scan-spin 0.6s linear infinite;
+    }
+
+    .scan-dots {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .scan-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #334155;
+      animation: dot-bounce 1.4s ease-in-out infinite;
+    }
+
+    .scan-dot:nth-child(2) { animation-delay: 0.2s; }
+    .scan-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes dot-bounce {
+      0%, 80%, 100% { background: #334155; transform: scale(1); }
+      40% { background: #22d3ee; transform: scale(1.4); }
+    }
+
     /* Analysis Result */
     .analysis-result {
       margin-top: 16px;
@@ -178,7 +321,42 @@
       display: none;
     }
 
-    .analysis-result.show { display: block; }
+    .analysis-result.show {
+      display: block;
+      animation: result-reveal 0.5s ease-out;
+    }
+
+    @keyframes result-reveal {
+      0% { opacity: 0; transform: translateY(16px) scale(0.97); }
+      60% { transform: translateY(-4px) scale(1.01); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .analysis-result.show .result-field {
+      animation: field-slide 0.4s ease-out backwards;
+    }
+    .analysis-result.show .result-field:nth-child(1) { animation-delay: 0.05s; }
+    .analysis-result.show .result-field:nth-child(2) { animation-delay: 0.1s; }
+    .analysis-result.show .result-field:nth-child(3) { animation-delay: 0.15s; }
+    .analysis-result.show .result-field:nth-child(4) { animation-delay: 0.2s; }
+    .analysis-result.show .result-field:nth-child(5) { animation-delay: 0.25s; }
+    .analysis-result.show .result-field:nth-child(6) { animation-delay: 0.3s; }
+    .analysis-result.show .result-field:nth-child(7) { animation-delay: 0.35s; }
+
+    @keyframes field-slide {
+      0% { opacity: 0; transform: translateX(-12px); }
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    .analysis-result.show .btn-save {
+      animation: save-pop 0.4s ease-out 0.45s backwards;
+    }
+
+    @keyframes save-pop {
+      0% { opacity: 0; transform: scale(0.8); }
+      70% { transform: scale(1.05); }
+      100% { opacity: 1; transform: scale(1); }
+    }
 
     .result-field {
       display: flex;
@@ -682,6 +860,27 @@
         วิเคราะห์สลิป
       </button>
 
+      <!-- Scanning Animation -->
+      <div class="scan-overlay" id="scanOverlay">
+        <div class="scan-visual">
+          <div class="scan-ring"></div>
+          <div class="scan-ring"></div>
+          <div class="scan-ring"></div>
+          <div class="scan-icon">🤖</div>
+        </div>
+        <ul class="scan-steps">
+          <li class="scan-step" id="scanStep1"><span class="scan-step-icon"></span> กำลังอ่านรูปสลิป...</li>
+          <li class="scan-step" id="scanStep2"><span class="scan-step-icon"></span> AI กำลังวิเคราะห์ข้อมูล...</li>
+          <li class="scan-step" id="scanStep3"><span class="scan-step-icon"></span> ดึงข้อมูลออกจากสลิป...</li>
+          <li class="scan-step" id="scanStep4"><span class="scan-step-icon"></span> กำลังจัดรูปแบบผลลัพธ์...</li>
+        </ul>
+        <div class="scan-dots">
+          <div class="scan-dot"></div>
+          <div class="scan-dot"></div>
+          <div class="scan-dot"></div>
+        </div>
+      </div>
+
       <!-- Analysis Result -->
       <div class="analysis-result" id="analysisResult">
         <div class="result-field">
@@ -947,7 +1146,13 @@
 
       const btn = document.getElementById('btnAnalyze');
       btn.disabled = true;
-      btn.textContent = 'กำลังวิเคราะห์...';
+      btn.classList.remove('show');
+      document.getElementById('analysisResult').classList.remove('show');
+
+      // Show scan overlay
+      const scanOverlay = document.getElementById('scanOverlay');
+      scanOverlay.classList.add('show');
+      startScanSteps();
 
       try {
         const model = config.aiModel || 'google/gemini-2.5-flash';
@@ -1002,16 +1207,63 @@
         if (jsonMatch) jsonStr = jsonMatch[0];
 
         const parsed = JSON.parse(jsonStr);
+        await finishScanSteps();
+        scanOverlay.classList.remove('show');
         fillResult(parsed);
         showToast('วิเคราะห์สลิปสำเร็จ');
 
       } catch (err) {
+        stopScanSteps();
+        scanOverlay.classList.remove('show');
         showToast('วิเคราะห์ไม่สำเร็จ: ' + err.message, true);
         console.error(err);
       } finally {
         btn.disabled = false;
         btn.textContent = 'วิเคราะห์สลิป';
+        btn.classList.add('show');
       }
+    }
+
+    // ─── Scan Step Animation ───
+    let scanInterval = null;
+    let currentScanStep = 0;
+
+    function startScanSteps() {
+      currentScanStep = 0;
+      for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById('scanStep' + i);
+        el.classList.remove('active', 'done');
+      }
+      document.getElementById('scanStep1').classList.add('active');
+      currentScanStep = 1;
+
+      scanInterval = setInterval(() => {
+        if (currentScanStep >= 4) {
+          clearInterval(scanInterval);
+          return;
+        }
+        document.getElementById('scanStep' + currentScanStep).classList.remove('active');
+        document.getElementById('scanStep' + currentScanStep).classList.add('done');
+        document.getElementById('scanStep' + currentScanStep).querySelector('.scan-step-icon').textContent = '✓';
+        currentScanStep++;
+        document.getElementById('scanStep' + currentScanStep).classList.add('active');
+      }, 1500);
+    }
+
+    async function finishScanSteps() {
+      clearInterval(scanInterval);
+      for (let i = currentScanStep; i <= 4; i++) {
+        const el = document.getElementById('scanStep' + i);
+        el.classList.remove('active');
+        el.classList.add('done');
+        el.querySelector('.scan-step-icon').textContent = '✓';
+        await new Promise(r => setTimeout(r, 200));
+      }
+      await new Promise(r => setTimeout(r, 400));
+    }
+
+    function stopScanSteps() {
+      clearInterval(scanInterval);
     }
 
     function fillResult(data) {
