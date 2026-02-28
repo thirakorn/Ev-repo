@@ -937,12 +937,16 @@
   <div class="modal-overlay" id="settingsModal">
     <div class="modal">
       <h2>ตั้งค่า</h2>
-      <div class="form-group">
-        <label>OpenRouter API Key</label>
-        <input type="password" id="cfgOpenRouterKey" placeholder="sk-or-...">
+      <div id="remoteConfigBadge" style="display:none; background:#064e3b; color:#6ee7b7; padding:8px 12px; border-radius:8px; font-size:0.8rem; margin-bottom:12px; text-align:center;">
+        ใช้ API Key จาก Remote Config
       </div>
       <div class="form-group">
-        <label>AI Model</label>
+        <label>OpenRouter API Key <span id="keySourceLabel" style="font-size:0.7rem; color:#64748b;"></span></label>
+        <input type="password" id="cfgOpenRouterKey" placeholder="sk-or-...">
+        <small id="keyHint" style="color:#64748b; font-size:0.7rem;"></small>
+      </div>
+      <div class="form-group">
+        <label>AI Model <span id="modelSourceLabel" style="font-size:0.7rem; color:#64748b;"></span></label>
         <select id="cfgAiModel">
           <option value="google/gemini-2.5-flash" selected>Gemini 2.5 Flash (แนะนำ)</option>
           <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash</option>
@@ -965,6 +969,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-remote-config-compat.js"></script>
 
   <script>
     // ─── Firebase Config (hardcoded) ───
@@ -980,10 +985,12 @@
     // ─── State ───
     let db = null;
     let auth = null;
+    let remoteConfig = null;
     let currentUser = null;
     let allCharges = [];
     let currentImageBase64 = null;
     let config = {};
+    let remoteKeys = { openRouterKey: '', aiModel: '' };
 
     // ─── Init ───
     document.addEventListener('DOMContentLoaded', () => {
@@ -1010,6 +1017,9 @@
         db = firebase.firestore();
         auth = firebase.auth();
 
+        // Init Remote Config
+        initRemoteConfig();
+
         // Listen for auth state changes
         auth.onAuthStateChanged((user) => {
           if (user) {
@@ -1024,6 +1034,36 @@
       } catch (e) {
         showToast('Firebase เชื่อมต่อไม่สำเร็จ: ' + e.message, true);
       }
+    }
+
+    async function initRemoteConfig() {
+      try {
+        remoteConfig = firebase.remoteConfig();
+        remoteConfig.settings.minimumFetchIntervalMillis = 300000; // 5 min cache
+        remoteConfig.defaultConfig = {
+          openrouter_api_key: '',
+          ai_model: ''
+        };
+
+        await remoteConfig.fetchAndActivate();
+        remoteKeys.openRouterKey = remoteConfig.getString('openrouter_api_key') || '';
+        remoteKeys.aiModel = remoteConfig.getString('ai_model') || '';
+
+        if (remoteKeys.openRouterKey) {
+          console.log('Remote Config: API key loaded');
+          updateSettingsUI();
+        }
+      } catch (e) {
+        console.warn('Remote Config fetch failed, using local config:', e.message);
+      }
+    }
+
+    function getActiveKey() {
+      return remoteKeys.openRouterKey || config.openRouterKey || '';
+    }
+
+    function getActiveModel() {
+      return remoteKeys.aiModel || config.aiModel || 'google/gemini-2.5-flash';
     }
 
     // ─── Auth ───
@@ -1062,8 +1102,8 @@
       document.getElementById('userName').textContent = user.displayName || 'ผู้ใช้';
       document.getElementById('userEmail').textContent = user.email || '';
 
-      // Check if OpenRouter key is set
-      if (!config.openRouterKey) {
+      // Check if OpenRouter key is set (local or remote)
+      if (!getActiveKey()) {
         showToast('กรุณาตั้งค่า OpenRouter API Key', true);
       }
     }
@@ -1072,7 +1112,31 @@
     function openSettings() {
       document.getElementById('cfgOpenRouterKey').value = config.openRouterKey || '';
       document.getElementById('cfgAiModel').value = config.aiModel || 'google/gemini-2.5-flash';
+      updateSettingsUI();
       document.getElementById('settingsModal').classList.add('show');
+    }
+
+    function updateSettingsUI() {
+      const badge = document.getElementById('remoteConfigBadge');
+      const keyHint = document.getElementById('keyHint');
+      const keyLabel = document.getElementById('keySourceLabel');
+      const modelLabel = document.getElementById('modelSourceLabel');
+
+      if (remoteKeys.openRouterKey) {
+        badge.style.display = 'block';
+        keyHint.textContent = 'Remote Config มี key อยู่แล้ว — กรอกด้านล่างเพื่อ override';
+        keyLabel.textContent = '(Remote Config)';
+      } else {
+        badge.style.display = 'none';
+        keyHint.textContent = '';
+        keyLabel.textContent = '';
+      }
+
+      if (remoteKeys.aiModel) {
+        modelLabel.textContent = '(Remote Config: ' + remoteKeys.aiModel + ')';
+      } else {
+        modelLabel.textContent = '';
+      }
     }
 
     function closeSettings() {
@@ -1133,7 +1197,8 @@
 
     // ─── OpenRouter AI Analysis ───
     async function analyzeSlip() {
-      if (!config.openRouterKey) {
+      const apiKey = getActiveKey();
+      if (!apiKey) {
         showToast('กรุณาตั้งค่า OpenRouter API Key ก่อน', true);
         openSettings();
         return;
@@ -1155,12 +1220,12 @@
       startScanSteps();
 
       try {
-        const model = config.aiModel || 'google/gemini-2.5-flash';
+        const model = getActiveModel();
 
         const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${config.openRouterKey}`,
+            'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
