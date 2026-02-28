@@ -609,8 +609,16 @@
     </h1>
   </header>
 
+  <!-- Auth Loading Screen -->
+  <div class="container" id="authLoading">
+    <div class="login-screen">
+      <div class="spinner"></div>
+      <p style="margin-top:16px;color:#94a3b8;">กำลังตรวจสอบสถานะ...</p>
+    </div>
+  </div>
+
   <!-- Login Screen -->
-  <div class="container" id="loginScreen">
+  <div class="container hidden" id="loginScreen">
     <div class="login-screen">
       <div class="login-icon">⚡</div>
       <h2>EV Charging Tracker</h2>
@@ -840,11 +848,13 @@
     }
 
     function showLoginScreen() {
+      document.getElementById('authLoading').classList.add('hidden');
       document.getElementById('loginScreen').classList.remove('hidden');
       document.getElementById('mainApp').classList.add('hidden');
     }
 
     function showMainApp(user) {
+      document.getElementById('authLoading').classList.add('hidden');
       document.getElementById('loginScreen').classList.add('hidden');
       document.getElementById('mainApp').classList.remove('hidden');
 
