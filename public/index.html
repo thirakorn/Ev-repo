@@ -39,23 +39,7 @@
       padding: 20px;
     }
 
-    /* Settings Banner */
-    .settings-banner {
-      background: #1e293b;
-      border: 1px solid #f59e0b;
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 20px;
-      display: none;
-    }
 
-    .settings-banner.show { display: block; }
-
-    .settings-banner p {
-      color: #f59e0b;
-      font-size: 0.9rem;
-      margin-bottom: 10px;
-    }
 
     /* Stats Cards */
     .stats-grid {
@@ -937,16 +921,8 @@
   <div class="modal-overlay" id="settingsModal">
     <div class="modal">
       <h2>ตั้งค่า</h2>
-      <div id="remoteConfigBadge" style="display:none; background:#064e3b; color:#6ee7b7; padding:8px 12px; border-radius:8px; font-size:0.8rem; margin-bottom:12px; text-align:center;">
-        ใช้ API Key จาก Remote Config
-      </div>
       <div class="form-group">
-        <label>OpenRouter API Key <span id="keySourceLabel" style="font-size:0.7rem; color:#64748b;"></span></label>
-        <input type="password" id="cfgOpenRouterKey" placeholder="sk-or-...">
-        <small id="keyHint" style="color:#64748b; font-size:0.7rem;"></small>
-      </div>
-      <div class="form-group">
-        <label>AI Model <span id="modelSourceLabel" style="font-size:0.7rem; color:#64748b;"></span></label>
+        <label>AI Model</label>
         <select id="cfgAiModel">
           <option value="google/gemini-2.5-flash" selected>Gemini 2.5 Flash (แนะนำ)</option>
           <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash</option>
@@ -1059,7 +1035,7 @@
     }
 
     function getActiveKey() {
-      return remoteKeys.openRouterKey || config.openRouterKey || '';
+      return remoteKeys.openRouterKey || '';
     }
 
     function getActiveModel() {
@@ -1102,41 +1078,12 @@
       document.getElementById('userName').textContent = user.displayName || 'ผู้ใช้';
       document.getElementById('userEmail').textContent = user.email || '';
 
-      // Check if OpenRouter key is set (local or remote)
-      if (!getActiveKey()) {
-        showToast('กรุณาตั้งค่า OpenRouter API Key', true);
-      }
     }
 
-    // ─── Settings (OpenRouter only) ───
+    // ─── Settings ───
     function openSettings() {
-      document.getElementById('cfgOpenRouterKey').value = config.openRouterKey || '';
       document.getElementById('cfgAiModel').value = config.aiModel || 'google/gemini-2.5-flash';
-      updateSettingsUI();
       document.getElementById('settingsModal').classList.add('show');
-    }
-
-    function updateSettingsUI() {
-      const badge = document.getElementById('remoteConfigBadge');
-      const keyHint = document.getElementById('keyHint');
-      const keyLabel = document.getElementById('keySourceLabel');
-      const modelLabel = document.getElementById('modelSourceLabel');
-
-      if (remoteKeys.openRouterKey) {
-        badge.style.display = 'block';
-        keyHint.textContent = 'Remote Config มี key อยู่แล้ว — กรอกด้านล่างเพื่อ override';
-        keyLabel.textContent = '(Remote Config)';
-      } else {
-        badge.style.display = 'none';
-        keyHint.textContent = '';
-        keyLabel.textContent = '';
-      }
-
-      if (remoteKeys.aiModel) {
-        modelLabel.textContent = '(Remote Config: ' + remoteKeys.aiModel + ')';
-      } else {
-        modelLabel.textContent = '';
-      }
     }
 
     function closeSettings() {
@@ -1145,7 +1092,6 @@
 
     function saveSettings() {
       config = {
-        openRouterKey: document.getElementById('cfgOpenRouterKey').value.trim(),
         aiModel: document.getElementById('cfgAiModel').value
       };
 
@@ -1199,8 +1145,7 @@
     async function analyzeSlip() {
       const apiKey = getActiveKey();
       if (!apiKey) {
-        showToast('กรุณาตั้งค่า OpenRouter API Key ก่อน', true);
-        openSettings();
+        showToast('ระบบยังไม่พร้อม — ไม่พบ API Key', true);
         return;
       }
 
