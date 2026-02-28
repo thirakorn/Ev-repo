@@ -586,6 +586,182 @@
 
     .settings-btn:hover { border-color: #22d3ee; color: #22d3ee; }
 
+    /* Tab Navigation */
+    .tab-nav {
+      display: flex;
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 20px;
+      border: 1px solid #334155;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .tab-btn.active {
+      background: #0f172a;
+      color: #22d3ee;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .tab-btn svg { width: 16px; height: 16px; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Dashboard */
+    .dash-section {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid #334155;
+    }
+
+    .dash-section h3 {
+      color: #22d3ee;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dash-section h3 .dash-icon {
+      font-size: 1rem;
+    }
+
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 250px;
+    }
+
+    .chart-container.tall {
+      height: 320px;
+    }
+
+    .chart-toggle {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+
+    .chart-toggle button {
+      flex: 1;
+      padding: 6px 10px;
+      border: 1px solid #334155;
+      background: transparent;
+      color: #64748b;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chart-toggle button.active {
+      background: #22d3ee;
+      color: #0f172a;
+      border-color: #22d3ee;
+      font-weight: 600;
+    }
+
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: 40px repeat(7, 1fr);
+      gap: 3px;
+      font-size: 0.65rem;
+    }
+
+    .heatmap-label {
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+    }
+
+    .heatmap-cell {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      background: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      color: #94a3b8;
+      transition: all 0.2s;
+      min-height: 28px;
+    }
+
+    .donut-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .donut-card {
+      text-align: center;
+    }
+
+    .donut-card .chart-container {
+      height: 180px;
+    }
+
+    .donut-label {
+      color: #94a3b8;
+      font-size: 0.75rem;
+      margin-top: 4px;
+    }
+
+    .dash-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: #475569;
+    }
+
+    .dash-empty .dash-empty-icon {
+      font-size: 2.5rem;
+      margin-bottom: 12px;
+    }
+
+    .legend-custom {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+      justify-content: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      color: #94a3b8;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
     /* Auth Styles */
     .login-screen {
       display: flex;
@@ -807,6 +983,21 @@
       <button class="btn-logout" onclick="signOutUser()">ออกจากระบบ</button>
     </div>
 
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('home')" id="tabHome">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        หน้าหลัก
+      </button>
+      <button class="tab-btn" onclick="switchTab('dashboard')" id="tabDashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </button>
+    </div>
+
+    <!-- Home Tab -->
+    <div class="tab-content active" id="tabContentHome">
+
     <!-- Stats -->
     <div class="stats-grid">
       <div class="stat-card">
@@ -915,6 +1106,71 @@
       <div id="chargeList"></div>
     </div>
 
+    </div><!-- end tabContentHome -->
+
+    <!-- Dashboard Tab -->
+    <div class="tab-content" id="tabContentDashboard">
+
+      <div id="dashEmpty" class="dash-empty">
+        <div class="dash-empty-icon">📊</div>
+        <p>ยังไม่มีข้อมูล — เพิ่มการชาร์จเพื่อดู Dashboard</p>
+      </div>
+
+      <div id="dashCharts" style="display:none;">
+
+        <!-- 1. Usage & Cost Trends -->
+        <div class="dash-section">
+          <h3><span class="dash-icon">📈</span> แนวโน้มการชาร์จรายเดือน</h3>
+          <div class="chart-toggle" id="trendToggle">
+            <button class="active" onclick="setTrendMode('kwh')">kWh</button>
+            <button onclick="setTrendMode('cost')">ค่าใช้จ่าย (฿)</button>
+            <button onclick="setTrendMode('count')">จำนวนครั้ง</button>
+          </div>
+          <div class="chart-container"><canvas id="chartTrend"></canvas></div>
+        </div>
+
+        <!-- 2. Cost per kWh Trend -->
+        <div class="dash-section">
+          <h3><span class="dash-icon">💰</span> แนวโน้มราคาต่อ kWh</h3>
+          <div class="chart-container"><canvas id="chartCostPerKwh"></canvas></div>
+        </div>
+
+        <!-- 3. Day of Week Heatmap -->
+        <div class="dash-section">
+          <h3><span class="dash-icon">🗓️</span> วันที่ชาร์จบ่อย</h3>
+          <div class="chart-container"><canvas id="chartDayOfWeek"></canvas></div>
+        </div>
+
+        <!-- 4. Heatmap: Month × DayOfWeek -->
+        <div class="dash-section">
+          <h3><span class="dash-icon">🔥</span> Heatmap ชาร์จรายวัน × เดือน</h3>
+          <div id="heatmapContainer" class="heatmap-grid"></div>
+        </div>
+
+        <!-- 5. Distribution -->
+        <div class="dash-section">
+          <h3><span class="dash-icon">🍩</span> สัดส่วนสถานีชาร์จ</h3>
+          <div class="donut-row">
+            <div class="donut-card">
+              <div class="donut-label">ตามจำนวนครั้ง</div>
+              <div class="chart-container"><canvas id="chartStationCount"></canvas></div>
+            </div>
+            <div class="donut-card">
+              <div class="donut-label">ตามค่าใช้จ่าย</div>
+              <div class="chart-container"><canvas id="chartStationCost"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Avg Duration by Station -->
+        <div class="dash-section">
+          <h3><span class="dash-icon">⏱️</span> ระยะเวลาชาร์จเฉลี่ย (นาที)</h3>
+          <div class="chart-container tall"><canvas id="chartDuration"></canvas></div>
+        </div>
+
+      </div>
+    </div><!-- end tabContentDashboard -->
+
   </div>
 
   <!-- Settings Modal -->
@@ -946,6 +1202,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-remote-config-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
   <script>
     // ─── Firebase Config (hardcoded) ───
@@ -1360,6 +1617,11 @@
         renderCharges(allCharges);
         updateStats(allCharges);
 
+        // Refresh dashboard if visible
+        if (document.getElementById('tabContentDashboard').classList.contains('active')) {
+          buildDashboard(allCharges);
+        }
+
       } catch (err) {
         listEl.innerHTML = `<div class="empty-state"><p>โหลดข้อมูลไม่สำเร็จ: ${err.message}</p></div>`;
       }
@@ -1484,6 +1746,352 @@
       toast.className = 'toast' + (isError ? ' error' : '');
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // ═══════════════════════════════════
+    // ─── Tab Navigation ───
+    // ═══════════════════════════════════
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+      if (tab === 'dashboard') {
+        document.getElementById('tabDashboard').classList.add('active');
+        document.getElementById('tabContentDashboard').classList.add('active');
+        buildDashboard(allCharges);
+      } else {
+        document.getElementById('tabHome').classList.add('active');
+        document.getElementById('tabContentHome').classList.add('active');
+      }
+    }
+
+    // ═══════════════════════════════════
+    // ─── Dashboard ───
+    // ═══════════════════════════════════
+    const CHART_COLORS = ['#22d3ee', '#f59e0b', '#10b981', '#f472b6', '#a78bfa', '#fb923c', '#34d399', '#60a5fa'];
+    let chartInstances = {};
+    let currentTrendMode = 'kwh';
+
+    function buildDashboard(charges) {
+      if (!charges || charges.length === 0) {
+        document.getElementById('dashEmpty').style.display = 'block';
+        document.getElementById('dashCharts').style.display = 'none';
+        return;
+      }
+      document.getElementById('dashEmpty').style.display = 'none';
+      document.getElementById('dashCharts').style.display = 'block';
+
+      buildTrendChart(charges);
+      buildCostPerKwhChart(charges);
+      buildDayOfWeekChart(charges);
+      buildHeatmap(charges);
+      buildStationCharts(charges);
+      buildDurationChart(charges);
+    }
+
+    // ─── Helper: group by month ───
+    function groupByMonth(charges) {
+      const map = {};
+      charges.forEach(c => {
+        if (!c.date) return;
+        const m = c.date.substring(0, 7); // YYYY-MM
+        if (!map[m]) map[m] = [];
+        map[m].push(c);
+      });
+      const keys = Object.keys(map).sort();
+      return { keys, map };
+    }
+
+    function monthLabel(ym) {
+      const [y, m] = ym.split('-');
+      const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+      return months[parseInt(m) - 1] + ' ' + y.slice(2);
+    }
+
+    // ─── 1. Monthly Trend Bar Chart ───
+    function buildTrendChart(charges) {
+      const { keys, map } = groupByMonth(charges);
+      const labels = keys.map(monthLabel);
+
+      let data, label, color;
+      if (currentTrendMode === 'kwh') {
+        data = keys.map(k => map[k].reduce((s, c) => s + (c.kwh || 0), 0));
+        label = 'kWh'; color = '#22d3ee';
+      } else if (currentTrendMode === 'cost') {
+        data = keys.map(k => map[k].reduce((s, c) => s + (c.cost || 0), 0));
+        label = 'บาท'; color = '#f59e0b';
+      } else {
+        data = keys.map(k => map[k].length);
+        label = 'ครั้ง'; color = '#10b981';
+      }
+
+      destroyChart('chartTrend');
+      chartInstances['chartTrend'] = new Chart(document.getElementById('chartTrend'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label,
+            data,
+            backgroundColor: color + '99',
+            borderColor: color,
+            borderWidth: 2,
+            borderRadius: 6,
+          }]
+        },
+        options: chartOpts(label)
+      });
+    }
+
+    function setTrendMode(mode) {
+      currentTrendMode = mode;
+      document.querySelectorAll('#trendToggle button').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      buildTrendChart(allCharges);
+    }
+
+    // ─── 2. Cost per kWh Line Chart ───
+    function buildCostPerKwhChart(charges) {
+      const { keys, map } = groupByMonth(charges);
+      const labels = keys.map(monthLabel);
+      const data = keys.map(k => {
+        const totalCost = map[k].reduce((s, c) => s + (c.cost || 0), 0);
+        const totalKwh = map[k].reduce((s, c) => s + (c.kwh || 0), 0);
+        return totalKwh > 0 ? Math.round((totalCost / totalKwh) * 100) / 100 : 0;
+      });
+
+      destroyChart('chartCostPerKwh');
+      chartInstances['chartCostPerKwh'] = new Chart(document.getElementById('chartCostPerKwh'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: '฿/kWh',
+            data,
+            borderColor: '#f59e0b',
+            backgroundColor: '#f59e0b22',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#f59e0b',
+            pointRadius: 4,
+          }]
+        },
+        options: chartOpts('฿/kWh')
+      });
+    }
+
+    // ─── 3. Day of Week Bar Chart ───
+    function buildDayOfWeekChart(charges) {
+      const dayNames = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสฯ', 'ศุกร์', 'เสาร์'];
+      const counts = [0, 0, 0, 0, 0, 0, 0];
+      charges.forEach(c => {
+        if (!c.date) return;
+        const d = new Date(c.date + 'T00:00:00');
+        counts[d.getDay()]++;
+      });
+
+      // Reorder: Mon-Sun
+      const orderedLabels = [...dayNames.slice(1), dayNames[0]];
+      const orderedData = [...counts.slice(1), counts[0]];
+      const colors = orderedData.map((v, i) => {
+        const max = Math.max(...orderedData);
+        const intensity = max > 0 ? v / max : 0;
+        return `rgba(34, 211, 238, ${0.2 + intensity * 0.8})`;
+      });
+
+      destroyChart('chartDayOfWeek');
+      chartInstances['chartDayOfWeek'] = new Chart(document.getElementById('chartDayOfWeek'), {
+        type: 'bar',
+        data: {
+          labels: orderedLabels,
+          datasets: [{
+            label: 'จำนวนครั้ง',
+            data: orderedData,
+            backgroundColor: colors,
+            borderColor: '#22d3ee',
+            borderWidth: 1,
+            borderRadius: 6,
+          }]
+        },
+        options: chartOpts('ครั้ง')
+      });
+    }
+
+    // ─── 4. Heatmap: Month × Day of Week ───
+    function buildHeatmap(charges) {
+      const container = document.getElementById('heatmapContainer');
+      const dayNames = ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.', 'อา.'];
+      const { keys } = groupByMonth(charges);
+
+      // Build count grid
+      const grid = {}; // grid["YYYY-MM"][0-6] = count (0=Mon)
+      charges.forEach(c => {
+        if (!c.date) return;
+        const m = c.date.substring(0, 7);
+        const d = new Date(c.date + 'T00:00:00');
+        let day = d.getDay() - 1; // Mon=0 ... Sun=6
+        if (day < 0) day = 6;
+        if (!grid[m]) grid[m] = [0, 0, 0, 0, 0, 0, 0];
+        grid[m][day]++;
+      });
+
+      let maxVal = 0;
+      Object.values(grid).forEach(row => row.forEach(v => { if (v > maxVal) maxVal = v; }));
+
+      let html = '<div class="heatmap-label"></div>';
+      keys.forEach(k => { html += `<div class="heatmap-label">${monthLabel(k)}</div>`; });
+
+      for (let d = 0; d < 7; d++) {
+        html += `<div class="heatmap-label">${dayNames[d]}</div>`;
+        keys.forEach(k => {
+          const val = (grid[k] && grid[k][d]) || 0;
+          const intensity = maxVal > 0 ? val / maxVal : 0;
+          const bg = val === 0 ? '#1e293b' : `rgba(34, 211, 238, ${0.15 + intensity * 0.85})`;
+          const textColor = intensity > 0.5 ? '#0f172a' : '#64748b';
+          html += `<div class="heatmap-cell" style="background:${bg};color:${textColor}">${val || ''}</div>`;
+        });
+      }
+
+      container.innerHTML = html;
+      container.style.gridTemplateColumns = `40px repeat(${keys.length}, 1fr)`;
+    }
+
+    // ─── 5. Station Distribution Donut ───
+    function buildStationCharts(charges) {
+      const countMap = {};
+      const costMap = {};
+      charges.forEach(c => {
+        const s = c.station || 'ไม่ระบุ';
+        countMap[s] = (countMap[s] || 0) + 1;
+        costMap[s] = (costMap[s] || 0) + (c.cost || 0);
+      });
+
+      // Top 6 + others
+      const buildDonut = (map, canvasId) => {
+        const sorted = Object.entries(map).sort((a, b) => b[1] - a[1]);
+        let labels, data;
+        if (sorted.length > 6) {
+          const top = sorted.slice(0, 6);
+          const othersVal = sorted.slice(6).reduce((s, e) => s + e[1], 0);
+          labels = [...top.map(e => e[0]), 'อื่นๆ'];
+          data = [...top.map(e => e[1]), othersVal];
+        } else {
+          labels = sorted.map(e => e[0]);
+          data = sorted.map(e => e[1]);
+        }
+
+        destroyChart(canvasId);
+        chartInstances[canvasId] = new Chart(document.getElementById(canvasId), {
+          type: 'doughnut',
+          data: {
+            labels,
+            datasets: [{
+              data,
+              backgroundColor: CHART_COLORS.slice(0, labels.length),
+              borderColor: '#1e293b',
+              borderWidth: 2,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 10, padding: 8 }
+              }
+            },
+            cutout: '55%',
+          }
+        });
+      };
+
+      buildDonut(countMap, 'chartStationCount');
+      buildDonut(costMap, 'chartStationCost');
+    }
+
+    // ─── 6. Duration by Station (horizontal bar) ───
+    function buildDurationChart(charges) {
+      const durationMap = {};
+      const countMap = {};
+      charges.forEach(c => {
+        if (!c.duration) return;
+        const s = c.station || 'ไม่ระบุ';
+        durationMap[s] = (durationMap[s] || 0) + c.duration;
+        countMap[s] = (countMap[s] || 0) + 1;
+      });
+
+      const entries = Object.keys(durationMap)
+        .map(s => ({ station: s, avg: Math.round(durationMap[s] / countMap[s]) }))
+        .sort((a, b) => b.avg - a.avg)
+        .slice(0, 8);
+
+      if (entries.length === 0) {
+        destroyChart('chartDuration');
+        return;
+      }
+
+      destroyChart('chartDuration');
+      chartInstances['chartDuration'] = new Chart(document.getElementById('chartDuration'), {
+        type: 'bar',
+        data: {
+          labels: entries.map(e => e.station),
+          datasets: [{
+            label: 'นาที',
+            data: entries.map(e => e.avg),
+            backgroundColor: '#a78bfa99',
+            borderColor: '#a78bfa',
+            borderWidth: 2,
+            borderRadius: 6,
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } },
+            y: {
+              ticks: {
+                color: '#94a3b8',
+                font: { size: 10 },
+                callback: function(value) {
+                  const label = this.getLabelForValue(value);
+                  return label.length > 12 ? label.substring(0, 12) + '…' : label;
+                }
+              },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    // ─── Chart Helpers ───
+    function destroyChart(id) {
+      if (chartInstances[id]) {
+        chartInstances[id].destroy();
+        delete chartInstances[id];
+      }
+    }
+
+    function chartOpts(yLabel) {
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: { ticks: { color: '#64748b', font: { size: 10 } }, grid: { color: '#1e293b' } },
+          y: {
+            ticks: { color: '#64748b' },
+            grid: { color: '#1e293b' },
+            title: { display: true, text: yLabel, color: '#475569', font: { size: 10 } }
+          }
+        }
+      };
     }
   </script>
 </body>
