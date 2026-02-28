@@ -693,6 +693,10 @@
           <input type="number" id="resultCost" step="0.01" placeholder="0.00">
         </div>
         <div class="result-field">
+          <label>ราคาต่อ kWh (฿)</label>
+          <input type="number" id="resultPricePerKwh" step="0.01" placeholder="0.00" readonly style="color:#22d3ee;background:#0f172a;">
+        </div>
+        <div class="result-field">
           <label>ระยะเวลา (นาที)</label>
           <input type="number" id="resultDuration" step="1" placeholder="0">
         </div>
@@ -780,6 +784,8 @@
       setupFileInput();
       setDefaultMonth();
       initFirebase();
+      document.getElementById('resultCost').addEventListener('input', calcPricePerKwh);
+      document.getElementById('resultKwh').addEventListener('input', calcPricePerKwh);
     });
 
     function loadConfig() {
@@ -1006,6 +1012,14 @@
       document.getElementById('resultDuration').value = data.duration_minutes || 0;
       document.getElementById('resultNote').value = data.note || '';
       document.getElementById('analysisResult').classList.add('show');
+      calcPricePerKwh();
+    }
+
+    function calcPricePerKwh() {
+      const cost = parseFloat(document.getElementById('resultCost').value) || 0;
+      const kwh = parseFloat(document.getElementById('resultKwh').value) || 0;
+      const price = kwh > 0 ? (cost / kwh).toFixed(2) : '0.00';
+      document.getElementById('resultPricePerKwh').value = price;
     }
 
     // ─── Helper: get user's charges collection ───
