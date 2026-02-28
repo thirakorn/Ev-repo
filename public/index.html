@@ -725,32 +725,87 @@
       font-weight: 600;
     }
 
-    .heatmap-grid {
-      display: grid;
-      grid-template-columns: 40px repeat(7, 1fr);
-      gap: 3px;
-      font-size: 0.65rem;
-    }
-
-    .heatmap-label {
-      color: #64748b;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.6rem;
-    }
-
-    .heatmap-cell {
-      aspect-ratio: 1;
-      border-radius: 4px;
+    .spending-card {
       background: #0f172a;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .spending-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .spending-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .spending-nav button {
+      background: #334155;
+      border: none;
+      color: #e2e8f0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 1rem;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.6rem;
-      color: #94a3b8;
-      transition: all 0.2s;
-      min-height: 28px;
+      transition: background 0.2s;
+    }
+
+    .spending-nav button:hover {
+      background: #475569;
+    }
+
+    .spending-nav button:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    .spending-title {
+      text-align: center;
+    }
+
+    .spending-title .label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .spending-title .date-range {
+      font-size: 0.7rem;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .spending-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      text-align: center;
+    }
+
+    .spending-stat .value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #22d3ee;
+    }
+
+    .spending-stat .value.cost {
+      color: #f59e0b;
+    }
+
+    .spending-stat .unit {
+      font-size: 0.65rem;
+      color: #64748b;
+      margin-top: 2px;
     }
 
     .donut-row {
@@ -1168,6 +1223,71 @@
 
       <div id="dashCharts" style="display:none;">
 
+        <!-- Spending Summary -->
+        <div class="dash-section">
+          <h3><span class="dash-icon">💸</span> สรุปค่าใช้จ่าย</h3>
+
+          <!-- Weekly -->
+          <div class="spending-card">
+            <div class="spending-header">
+              <div class="spending-nav">
+                <button onclick="navWeek(-1)">‹</button>
+              </div>
+              <div class="spending-title">
+                <div class="label" id="weekLabel">สัปดาห์นี้</div>
+                <div class="date-range" id="weekDateRange"></div>
+              </div>
+              <div class="spending-nav">
+                <button onclick="navWeek(1)" id="weekNextBtn">›</button>
+              </div>
+            </div>
+            <div class="spending-stats">
+              <div class="spending-stat">
+                <div class="value cost" id="weekCost">0</div>
+                <div class="unit">บาท</div>
+              </div>
+              <div class="spending-stat">
+                <div class="value" id="weekKwh">0</div>
+                <div class="unit">kWh</div>
+              </div>
+              <div class="spending-stat">
+                <div class="value" id="weekCount">0</div>
+                <div class="unit">ครั้ง</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Monthly -->
+          <div class="spending-card">
+            <div class="spending-header">
+              <div class="spending-nav">
+                <button onclick="navMonth(-1)">‹</button>
+              </div>
+              <div class="spending-title">
+                <div class="label" id="monthLabel">เดือนนี้</div>
+                <div class="date-range" id="monthDateRange"></div>
+              </div>
+              <div class="spending-nav">
+                <button onclick="navMonth(1)" id="monthNextBtn">›</button>
+              </div>
+            </div>
+            <div class="spending-stats">
+              <div class="spending-stat">
+                <div class="value cost" id="monthCost">0</div>
+                <div class="unit">บาท</div>
+              </div>
+              <div class="spending-stat">
+                <div class="value" id="monthKwh">0</div>
+                <div class="unit">kWh</div>
+              </div>
+              <div class="spending-stat">
+                <div class="value" id="monthCount">0</div>
+                <div class="unit">ครั้ง</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- 1. Usage & Cost Trends -->
         <div class="dash-section">
           <h3><span class="dash-icon">📈</span> แนวโน้มการชาร์จรายเดือน</h3>
@@ -1191,13 +1311,7 @@
           <div class="chart-container"><canvas id="chartDayOfWeek"></canvas></div>
         </div>
 
-        <!-- 4. Heatmap: Month × DayOfWeek -->
-        <div class="dash-section">
-          <h3><span class="dash-icon">🔥</span> Heatmap ชาร์จรายวัน × เดือน</h3>
-          <div id="heatmapContainer" class="heatmap-grid"></div>
-        </div>
-
-        <!-- 5. Distribution -->
+        <!-- 4. Distribution -->
         <div class="dash-section">
           <h3><span class="dash-icon">🍩</span> สัดส่วนสถานีชาร์จ</h3>
           <div class="donut-row">
@@ -1864,10 +1978,10 @@
       document.getElementById('dashEmpty').style.display = 'none';
       document.getElementById('dashCharts').style.display = 'block';
 
+      buildSpendingSummary(charges);
       buildTrendChart(charges);
       buildCostPerKwhChart(charges);
       buildDayOfWeekChart(charges);
-      buildHeatmap(charges);
       buildStationCharts(charges);
       buildDurationChart(charges);
     }
@@ -2000,43 +2114,91 @@
       });
     }
 
-    // ─── 4. Heatmap: Month × Day of Week ───
-    function buildHeatmap(charges) {
-      const container = document.getElementById('heatmapContainer');
-      const dayNames = ['จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.', 'อา.'];
-      const { keys } = groupByMonth(charges);
+    // ─── Spending Summary (Weekly & Monthly with navigation) ───
+    let weekOffset = 0;
+    let monthOffset = 0;
 
-      // Build count grid
-      const grid = {}; // grid["YYYY-MM"][0-6] = count (0=Mon)
+    function getWeekRange(offset) {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const dayOfWeek = today.getDay(); // 0=Sun
+      const mondayDiff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const monday = new Date(today);
+      monday.setDate(today.getDate() + mondayDiff + (offset * 7));
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      return { start: monday, end: sunday };
+    }
+
+    function getMonthRange(offset) {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + offset;
+      const start = new Date(year, month, 1);
+      const end = new Date(year, month + 1, 0);
+      return { start, end };
+    }
+
+    function formatDateShort(d) {
+      return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+    }
+
+    function formatMonthYear(d) {
+      return d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+    }
+
+    function calcSpending(charges, start, end) {
+      const startStr = start.toISOString().slice(0, 10);
+      const endStr = end.toISOString().slice(0, 10);
+      let totalCost = 0, totalKwh = 0, count = 0;
       charges.forEach(c => {
         if (!c.date) return;
-        const m = c.date.substring(0, 7);
-        const d = new Date(c.date + 'T00:00:00');
-        let day = d.getDay() - 1; // Mon=0 ... Sun=6
-        if (day < 0) day = 6;
-        if (!grid[m]) grid[m] = [0, 0, 0, 0, 0, 0, 0];
-        grid[m][day]++;
+        if (c.date >= startStr && c.date <= endStr) {
+          totalCost += (c.cost || 0);
+          totalKwh += (c.kwh || 0);
+          count++;
+        }
       });
+      return { totalCost, totalKwh, count };
+    }
 
-      let maxVal = 0;
-      Object.values(grid).forEach(row => row.forEach(v => { if (v > maxVal) maxVal = v; }));
+    function buildSpendingSummary(charges) {
+      // Weekly
+      const weekRange = getWeekRange(weekOffset);
+      const weekData = calcSpending(charges, weekRange.start, weekRange.end);
+      const weekLabel = weekOffset === 0 ? 'สัปดาห์นี้' : weekOffset === -1 ? 'สัปดาห์ที่แล้ว' : `${Math.abs(weekOffset)} สัปดาห์ก่อน`;
+      const weekDateRange = `${formatDateShort(weekRange.start)} - ${formatDateShort(weekRange.end)}`;
 
-      let html = '<div class="heatmap-label"></div>';
-      keys.forEach(k => { html += `<div class="heatmap-label">${monthLabel(k)}</div>`; });
+      document.getElementById('weekLabel').textContent = weekLabel;
+      document.getElementById('weekDateRange').textContent = weekDateRange;
+      document.getElementById('weekCost').textContent = weekData.totalCost.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('weekKwh').textContent = weekData.totalKwh.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('weekCount').textContent = weekData.count;
+      document.getElementById('weekNextBtn').disabled = weekOffset >= 0;
 
-      for (let d = 0; d < 7; d++) {
-        html += `<div class="heatmap-label">${dayNames[d]}</div>`;
-        keys.forEach(k => {
-          const val = (grid[k] && grid[k][d]) || 0;
-          const intensity = maxVal > 0 ? val / maxVal : 0;
-          const bg = val === 0 ? '#1e293b' : `rgba(34, 211, 238, ${0.15 + intensity * 0.85})`;
-          const textColor = intensity > 0.5 ? '#0f172a' : '#64748b';
-          html += `<div class="heatmap-cell" style="background:${bg};color:${textColor}">${val || ''}</div>`;
-        });
-      }
+      // Monthly
+      const monthRange = getMonthRange(monthOffset);
+      const monthData = calcSpending(charges, monthRange.start, monthRange.end);
+      const monthLabel = monthOffset === 0 ? 'เดือนนี้' : monthOffset === -1 ? 'เดือนที่แล้ว' : `${Math.abs(monthOffset)} เดือนก่อน`;
 
-      container.innerHTML = html;
-      container.style.gridTemplateColumns = `40px repeat(${keys.length}, 1fr)`;
+      document.getElementById('monthLabel').textContent = monthLabel;
+      document.getElementById('monthDateRange').textContent = formatMonthYear(monthRange.start);
+      document.getElementById('monthCost').textContent = monthData.totalCost.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('monthKwh').textContent = monthData.totalKwh.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('monthCount').textContent = monthData.count;
+      document.getElementById('monthNextBtn').disabled = monthOffset >= 0;
+    }
+
+    function navWeek(dir) {
+      weekOffset += dir;
+      if (weekOffset > 0) weekOffset = 0;
+      buildSpendingSummary(allCharges);
+    }
+
+    function navMonth(dir) {
+      monthOffset += dir;
+      if (monthOffset > 0) monthOffset = 0;
+      buildSpendingSummary(allCharges);
     }
 
     // ─── 5. Station Distribution Donut ───
