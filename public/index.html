@@ -1632,9 +1632,15 @@
                   {
                     type: 'text',
                     text: `วิเคราะห์สลิปการชาร์จรถไฟฟ้า${currentImagesBase64.length > 1 ? 'จากรูปทั้งหมด ' + currentImagesBase64.length + ' รูป รวมข้อมูลจากทุกรูปเข้าด้วยกัน' : 'นี้'} และส่งข้อมูลกลับเป็น JSON เท่านั้น ไม่ต้องมี markdown หรือข้อความอื่น
+
+สำคัญเรื่องวันที่: สลิปในไทยอาจแสดงปี พ.ศ. (ปีพุทธศักราช = ปี ค.ศ. + 543)
+- ถ้าเห็นปี 2 หลัก เช่น 69 หมายถึง พ.ศ. 2569 = ค.ศ. 2026
+- ถ้าเห็นปี 4 หลัก เช่น 2569 หมายถึง พ.ศ. 2569 = ค.ศ. 2026
+- ให้แปลงเป็นปี ค.ศ. เสมอ ในผลลัพธ์ date
+
 ตอบเป็น JSON format นี้เท่านั้น:
 {
-  "date": "YYYY-MM-DD",
+  "date": "YYYY-MM-DD (ปี ค.ศ. เท่านั้น)",
   "station": "ชื่อสถานีชาร์จ",
   "kwh": 0.00,
   "cost": 0.00,
@@ -1727,8 +1733,18 @@
       clearInterval(scanInterval);
     }
 
+    function convertBEtoCE(dateStr) {
+      if (!dateStr) return null;
+      const parts = dateStr.split('-');
+      if (parts.length !== 3) return dateStr;
+      let year = parseInt(parts[0]);
+      // If year > 2400, it's likely Buddhist Era (พ.ศ.) — convert to CE
+      if (year > 2400) year -= 543;
+      return year + '-' + parts[1] + '-' + parts[2];
+    }
+
     function fillResult(data) {
-      document.getElementById('resultDate').value = data.date || new Date().toISOString().split('T')[0];
+      document.getElementById('resultDate').value = convertBEtoCE(data.date) || new Date().toISOString().split('T')[0];
       document.getElementById('resultStation').value = data.station || '';
       document.getElementById('resultKwh').value = data.kwh || 0;
       document.getElementById('resultCost').value = data.cost || 0;
