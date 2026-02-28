@@ -1,11 +1,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /charges/{chargeId} {
-      allow read, write: if true;
-    }
-    match /settings/{docId} {
-      allow read, write: if true;
+    // Per-user data: only the owner can read/write their own charges
+    match /users/{userId}/charges/{chargeId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }

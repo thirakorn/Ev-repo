@@ -424,6 +424,117 @@
 
     .settings-btn:hover { border-color: #22d3ee; color: #22d3ee; }
 
+    /* Auth Styles */
+    .login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 80px);
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .login-screen .login-icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+    }
+
+    .login-screen h2 {
+      color: #22d3ee;
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+    }
+
+    .login-screen p {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-bottom: 32px;
+      max-width: 300px;
+    }
+
+    .btn-google {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 32px;
+      background: white;
+      color: #333;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .btn-google:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    .btn-google:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-google svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .user-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      border: 1px solid #334155;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid #22d3ee;
+    }
+
+    .user-name {
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      font-weight: 500;
+    }
+
+    .user-email {
+      font-size: 0.7rem;
+      color: #64748b;
+    }
+
+    .btn-logout {
+      background: none;
+      border: 1px solid #ef4444;
+      color: #ef4444;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.3s;
+    }
+
+    .btn-logout:hover { background: #ef4444; color: white; }
+
+    .hidden { display: none !important; }
+
     /* Toast */
     .toast {
       position: fixed;
@@ -498,12 +609,32 @@
     </h1>
   </header>
 
-  <div class="container">
+  <!-- Login Screen -->
+  <div class="container" id="loginScreen">
+    <div class="login-screen">
+      <div class="login-icon">⚡</div>
+      <h2>EV Charging Tracker</h2>
+      <p>เข้าสู่ระบบด้วย Google เพื่อบันทึกและดูข้อมูลการชาร์จของคุณ</p>
+      <button class="btn-google" id="btnGoogleLogin" onclick="signInWithGoogle()">
+        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        เข้าสู่ระบบด้วย Google
+      </button>
+    </div>
+  </div>
 
-    <!-- Settings Banner -->
-    <div class="settings-banner" id="settingsBanner">
-      <p>กรุณาตั้งค่า API Key ก่อนเริ่มใช้งาน</p>
-      <button class="settings-btn" onclick="openSettings()">ตั้งค่า</button>
+  <!-- Main App (hidden until logged in) -->
+  <div class="container hidden" id="mainApp">
+
+    <!-- User Bar -->
+    <div class="user-bar">
+      <div class="user-info">
+        <img class="user-avatar" id="userAvatar" src="" alt="avatar">
+        <div>
+          <div class="user-name" id="userName"></div>
+          <div class="user-email" id="userEmail"></div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="signOutUser()">ออกจากระบบ</button>
     </div>
 
     <!-- Stats -->
@@ -596,30 +727,6 @@
     <div class="modal">
       <h2>ตั้งค่า</h2>
       <div class="form-group">
-        <label>Firebase API Key</label>
-        <input type="text" id="cfgFirebaseApiKey" placeholder="AIza...">
-      </div>
-      <div class="form-group">
-        <label>Firebase Auth Domain</label>
-        <input type="text" id="cfgFirebaseAuthDomain" placeholder="your-app.firebaseapp.com">
-      </div>
-      <div class="form-group">
-        <label>Firebase Project ID</label>
-        <input type="text" id="cfgFirebaseProjectId" placeholder="your-project-id">
-      </div>
-      <div class="form-group">
-        <label>Firebase Storage Bucket</label>
-        <input type="text" id="cfgFirebaseStorageBucket" placeholder="your-app.appspot.com">
-      </div>
-      <div class="form-group">
-        <label>Firebase Messaging Sender ID</label>
-        <input type="text" id="cfgFirebaseMessagingSenderId" placeholder="123456789">
-      </div>
-      <div class="form-group">
-        <label>Firebase App ID</label>
-        <input type="text" id="cfgFirebaseAppId" placeholder="1:123456789:web:abc123">
-      </div>
-      <div class="form-group">
         <label>OpenRouter API Key</label>
         <input type="password" id="cfgOpenRouterKey" placeholder="sk-or-...">
       </div>
@@ -645,11 +752,24 @@
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
   <script>
+    // ─── Firebase Config (hardcoded) ───
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyBxKw-XFmKQzOqBHFoCRTPJbMnXVaQR7eo",
+      authDomain: "ev-tracker-989cf.firebaseapp.com",
+      projectId: "ev-tracker-989cf",
+      storageBucket: "ev-tracker-989cf.firebasestorage.app",
+      messagingSenderId: "922607274938",
+      appId: "1:922607274938:web:66d54af4a68d4fbe98b498"
+    };
+
     // ─── State ───
     let db = null;
+    let auth = null;
+    let currentUser = null;
     let allCharges = [];
     let currentImageBase64 = null;
     let config = {};
@@ -659,55 +779,84 @@
       loadConfig();
       setupFileInput();
       setDefaultMonth();
+      initFirebase();
     });
 
     function loadConfig() {
       const saved = localStorage.getItem('ev_tracker_config');
       if (saved) {
         config = JSON.parse(saved);
-        initFirebase();
-      } else {
-        document.getElementById('settingsBanner').classList.add('show');
       }
     }
 
     function initFirebase() {
-      if (!config.firebaseApiKey || !config.firebaseProjectId) {
-        document.getElementById('settingsBanner').classList.add('show');
-        return;
-      }
-
-      const firebaseConfig = {
-        apiKey: config.firebaseApiKey,
-        authDomain: config.firebaseAuthDomain || '',
-        projectId: config.firebaseProjectId,
-        storageBucket: config.firebaseStorageBucket || '',
-        messagingSenderId: config.firebaseMessagingSenderId || '',
-        appId: config.firebaseAppId || ''
-      };
-
       try {
         if (!firebase.apps.length) {
-          firebase.initializeApp(firebaseConfig);
+          firebase.initializeApp(FIREBASE_CONFIG);
         }
         db = firebase.firestore();
-        document.getElementById('settingsBanner').classList.remove('show');
-        loadCharges();
+        auth = firebase.auth();
+
+        // Listen for auth state changes
+        auth.onAuthStateChanged((user) => {
+          if (user) {
+            currentUser = user;
+            showMainApp(user);
+            loadCharges();
+          } else {
+            currentUser = null;
+            showLoginScreen();
+          }
+        });
       } catch (e) {
         showToast('Firebase เชื่อมต่อไม่สำเร็จ: ' + e.message, true);
       }
     }
 
-    // ─── Settings ───
+    // ─── Auth ───
+    function signInWithGoogle() {
+      const btn = document.getElementById('btnGoogleLogin');
+      btn.disabled = true;
+      btn.textContent = 'กำลังเข้าสู่ระบบ...';
+
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch((err) => {
+        showToast('เข้าสู่ระบบไม่สำเร็จ: ' + err.message, true);
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> เข้าสู่ระบบด้วย Google';
+      });
+    }
+
+    function signOutUser() {
+      auth.signOut().then(() => {
+        showToast('ออกจากระบบแล้ว');
+      });
+    }
+
+    function showLoginScreen() {
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('mainApp').classList.add('hidden');
+    }
+
+    function showMainApp(user) {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+
+      // Update user info
+      document.getElementById('userAvatar').src = user.photoURL || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2394a3b8"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>';
+      document.getElementById('userName').textContent = user.displayName || 'ผู้ใช้';
+      document.getElementById('userEmail').textContent = user.email || '';
+
+      // Check if OpenRouter key is set
+      if (!config.openRouterKey) {
+        showToast('กรุณาตั้งค่า OpenRouter API Key', true);
+      }
+    }
+
+    // ─── Settings (OpenRouter only) ───
     function openSettings() {
-      document.getElementById('cfgFirebaseApiKey').value = config.firebaseApiKey || '';
-      document.getElementById('cfgFirebaseAuthDomain').value = config.firebaseAuthDomain || '';
-      document.getElementById('cfgFirebaseProjectId').value = config.firebaseProjectId || '';
-      document.getElementById('cfgFirebaseStorageBucket').value = config.firebaseStorageBucket || '';
-      document.getElementById('cfgFirebaseMessagingSenderId').value = config.firebaseMessagingSenderId || '';
-      document.getElementById('cfgFirebaseAppId').value = config.firebaseAppId || '';
       document.getElementById('cfgOpenRouterKey').value = config.openRouterKey || '';
-      document.getElementById('cfgAiModel').value = config.aiModel || 'google/gemini-2.0-flash-001';
+      document.getElementById('cfgAiModel').value = config.aiModel || 'google/gemini-2.5-flash';
       document.getElementById('settingsModal').classList.add('show');
     }
 
@@ -717,12 +866,6 @@
 
     function saveSettings() {
       config = {
-        firebaseApiKey: document.getElementById('cfgFirebaseApiKey').value.trim(),
-        firebaseAuthDomain: document.getElementById('cfgFirebaseAuthDomain').value.trim(),
-        firebaseProjectId: document.getElementById('cfgFirebaseProjectId').value.trim(),
-        firebaseStorageBucket: document.getElementById('cfgFirebaseStorageBucket').value.trim(),
-        firebaseMessagingSenderId: document.getElementById('cfgFirebaseMessagingSenderId').value.trim(),
-        firebaseAppId: document.getElementById('cfgFirebaseAppId').value.trim(),
         openRouterKey: document.getElementById('cfgOpenRouterKey').value.trim(),
         aiModel: document.getElementById('cfgAiModel').value
       };
@@ -730,15 +873,6 @@
       localStorage.setItem('ev_tracker_config', JSON.stringify(config));
       closeSettings();
       showToast('บันทึกการตั้งค่าแล้ว');
-
-      // Re-init firebase
-      if (firebase.apps.length) {
-        firebase.app().delete().then(() => {
-          initFirebase();
-        });
-      } else {
-        initFirebase();
-      }
     }
 
     // ─── File Input ───
@@ -874,10 +1008,15 @@
       document.getElementById('analysisResult').classList.add('show');
     }
 
+    // ─── Helper: get user's charges collection ───
+    function userChargesRef() {
+      return db.collection('users').doc(currentUser.uid).collection('charges');
+    }
+
     // ─── Save to Firestore ───
     async function saveCharge() {
-      if (!db) {
-        showToast('กรุณาตั้งค่า Firebase ก่อน', true);
+      if (!db || !currentUser) {
+        showToast('กรุณาเข้าสู่ระบบก่อน', true);
         return;
       }
 
@@ -896,7 +1035,7 @@
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        await db.collection('charges').add(chargeData);
+        await userChargesRef().add(chargeData);
         showToast('บันทึกข้อมูลสำเร็จ');
 
         // Reset form
@@ -919,13 +1058,13 @@
 
     // ─── Load Charges ───
     async function loadCharges() {
-      if (!db) return;
+      if (!db || !currentUser) return;
 
       const listEl = document.getElementById('chargeList');
       listEl.innerHTML = '<div class="loading"><div class="spinner"></div><p style="margin-top:12px">กำลังโหลด...</p></div>';
 
       try {
-        const snapshot = await db.collection('charges').orderBy('date', 'desc').get();
+        const snapshot = await userChargesRef().orderBy('date', 'desc').get();
         allCharges = [];
 
         snapshot.forEach(doc => {
@@ -1002,7 +1141,7 @@
       if (!confirm('ต้องการลบข้อมูลนี้?')) return;
 
       try {
-        await db.collection('charges').doc(id).delete();
+        await userChargesRef().doc(id).delete();
         showToast('ลบข้อมูลแล้ว');
         loadCharges();
       } catch (err) {
