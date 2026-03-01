@@ -2235,9 +2235,16 @@
       return d.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
     }
 
+    function toLocalDateStr(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
     function calcSpending(charges, start, end) {
-      const startStr = start.toISOString().slice(0, 10);
-      const endStr = end.toISOString().slice(0, 10);
+      const startStr = toLocalDateStr(start);
+      const endStr = toLocalDateStr(end);
       let totalCost = 0, totalKwh = 0, count = 0;
       charges.forEach(c => {
         if (!c.date) return;
