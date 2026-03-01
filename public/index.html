@@ -196,6 +196,46 @@
     .btn-analyze:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3); }
     .btn-analyze:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
+    /* Manual Input Divider & Button */
+    .manual-divider {
+      display: flex;
+      align-items: center;
+      margin: 16px 0;
+      gap: 12px;
+    }
+
+    .manual-divider::before,
+    .manual-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #334155;
+    }
+
+    .manual-divider span {
+      color: #64748b;
+      font-size: 0.85rem;
+    }
+
+    .btn-manual {
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      color: #94a3b8;
+      border: 1px dashed #475569;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-manual:hover {
+      border-color: #22d3ee;
+      color: #22d3ee;
+      background: rgba(34, 211, 238, 0.05);
+    }
+
     /* Scanning Overlay */
     .scan-overlay {
       display: none;
@@ -1139,6 +1179,14 @@
         + เพิ่มรูปอีก
       </button>
 
+      <div class="manual-divider">
+        <span>หรือ</span>
+      </div>
+
+      <button class="btn-manual" id="btnManual" onclick="openManualInput()">
+        ✏️ กรอกข้อมูลเอง
+      </button>
+
       <!-- Scanning Animation -->
       <div class="scan-overlay" id="scanOverlay">
         <div class="scan-visual">
@@ -1741,6 +1789,30 @@
       // If year > 2400, it's likely Buddhist Era (พ.ศ.) — convert to CE
       if (year > 2400) year -= 543;
       return year + '-' + parts[1] + '-' + parts[2];
+    }
+
+    function openManualInput() {
+      // Clear any previous images/analysis state
+      currentImagesBase64 = [];
+      document.getElementById('imagePreview').classList.remove('show');
+      document.getElementById('btnAnalyze').classList.remove('show');
+      document.getElementById('btnAddMore').style.display = 'none';
+      document.getElementById('fileInput').value = '';
+      document.getElementById('previewGallery').innerHTML = '';
+      document.getElementById('previewCount').textContent = '';
+
+      // Set default values and show form
+      document.getElementById('resultDate').value = new Date().toISOString().split('T')[0];
+      document.getElementById('resultStation').value = '';
+      document.getElementById('resultKwh').value = '';
+      document.getElementById('resultCost').value = '';
+      document.getElementById('resultDuration').value = '';
+      document.getElementById('resultNote').value = '';
+      document.getElementById('resultPricePerKwh').value = '';
+      document.getElementById('analysisResult').classList.add('show');
+
+      // Scroll to the form
+      document.getElementById('analysisResult').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     function fillResult(data) {
