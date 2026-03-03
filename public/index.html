@@ -1681,10 +1681,20 @@
                     type: 'text',
                     text: `วิเคราะห์สลิปการชาร์จรถไฟฟ้า${currentImagesBase64.length > 1 ? 'จากรูปทั้งหมด ' + currentImagesBase64.length + ' รูป รวมข้อมูลจากทุกรูปเข้าด้วยกัน' : 'นี้'} และส่งข้อมูลกลับเป็น JSON เท่านั้น ไม่ต้องมี markdown หรือข้อความอื่น
 
-สำคัญเรื่องวันที่: สลิปในไทยอาจแสดงปี พ.ศ. (ปีพุทธศักราช = ปี ค.ศ. + 543)
-- ถ้าเห็นปี 2 หลัก เช่น 69 หมายถึง พ.ศ. 2569 = ค.ศ. 2026
-- ถ้าเห็นปี 4 หลัก เช่น 2569 หมายถึง พ.ศ. 2569 = ค.ศ. 2026
-- ให้แปลงเป็นปี ค.ศ. เสมอ ในผลลัพธ์ date
+สำคัญมากเรื่องวันที่:
+1. สลิปในไทยอาจแสดงปี พ.ศ. (ปีพุทธศักราช = ปี ค.ศ. + 543)
+   - ถ้าเห็นปี 2 หลัก เช่น 69 หมายถึง พ.ศ. 2569 = ค.ศ. 2026
+   - ถ้าเห็นปี 4 หลัก เช่น 2569 หมายถึง พ.ศ. 2569 = ค.ศ. 2026
+   - ให้แปลงเป็นปี ค.ศ. เสมอ ในผลลัพธ์ date
+2. สลิปอาจแสดงวันที่ในหลายรูปแบบ ต้องระวังเรื่องลำดับ วัน/เดือน/ปี:
+   - DD/MM/YY เช่น 03/03/26 = วันที่ 3 มีนาคม ค.ศ. 2026
+   - YY/MM/DD เช่น 26/03/03 = ค.ศ. 2026 วันที่ 3 มีนาคม
+   - DD/MM/YYYY เช่น 03/03/2569 = วันที่ 3 มีนาคม พ.ศ. 2569 = ค.ศ. 2026
+   - YYYY-MM-DD เช่น 2026-03-03 = ค.ศ. 2026 วันที่ 3 มีนาคม
+   - ให้ดูบริบทในสลิป เช่น label "วันที่", "Date", ลำดับเวลาชาร์จ เพื่อแยกแยะว่าตัวเลขไหนเป็นวัน เดือน ปี
+   - ถ้าตัวเลขตัวแรก > 31 น่าจะเป็นปี (YY/MM/DD)
+   - ถ้าตัวเลขตัวสุดท้าย > 31 น่าจะเป็นปี (DD/MM/YY)
+   - วันที่ต้องอยู่ในช่วง 1-31, เดือนต้องอยู่ในช่วง 1-12
 
 ตอบเป็น JSON format นี้เท่านั้น:
 {
@@ -1791,6 +1801,64 @@
       return year + '-' + parts[1] + '-' + parts[2];
     }
 
+    function normalizeDate(dateStr) {
+      if (!dateStr) return null;
+      // Handle separators: -, /, .
+      const parts = dateStr.split(/[-\/\.]/);
+      if (parts.length !== 3) return dateStr;
+
+      let [a, b, c] = parts.map(p => parseInt(p));
+      let year, month, day;
+
+      // Determine format based on value ranges
+      if (a > 31) {
+        // First part > 31 → YYYY-MM-DD or YY-MM-DD (year first)
+        year = a;
+        month = b;
+        day = c;
+      } else if (c > 31) {
+        // Last part > 31 → DD-MM-YYYY (year last)
+        day = a;
+        month = b;
+        year = c;
+      } else if (a > 12 && c <= 12) {
+        // First part > 12 but ≤ 31 → likely DD-MM-YY
+        day = a;
+        month = b;
+        year = c;
+      } else if (c > 12 && a <= 12) {
+        // Last part > 12 but ≤ 31 → likely YY-MM-DD
+        year = a;
+        month = b;
+        day = c;
+      } else {
+        // Ambiguous (all parts ≤ 12) — assume YYYY-MM-DD as returned by AI
+        year = a;
+        month = b;
+        day = c;
+      }
+
+      // Convert 2-digit year
+      if (year < 100) {
+        // If 2-digit year > 40, likely Buddhist Era short (e.g. 69 = พ.ศ. 2569 = CE 2026)
+        if (year > 40) {
+          year = year + 2500 - 543; // Convert BE short to CE
+        } else {
+          year = 2000 + year;
+        }
+      }
+
+      // Convert Buddhist Era 4-digit year
+      if (year > 2400) year -= 543;
+
+      // Validate
+      if (month < 1 || month > 12 || day < 1 || day > 31) {
+        return dateStr; // Can't fix, return as-is
+      }
+
+      return year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+    }
+
     function openManualInput() {
       // Clear any previous images/analysis state
       currentImagesBase64 = [];
@@ -1816,7 +1884,7 @@
     }
 
     function fillResult(data) {
-      document.getElementById('resultDate').value = convertBEtoCE(data.date) || new Date().toISOString().split('T')[0];
+      document.getElementById('resultDate').value = normalizeDate(data.date) || new Date().toISOString().split('T')[0];
       document.getElementById('resultStation').value = data.station || '';
       document.getElementById('resultKwh').value = data.kwh || 0;
       document.getElementById('resultCost').value = data.cost || 0;
