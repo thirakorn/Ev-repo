@@ -1228,6 +1228,14 @@
           <input type="number" id="resultCost" step="0.01" placeholder="0.00">
         </div>
         <div class="result-field">
+          <label>ส่วนลด (฿)</label>
+          <input type="number" id="resultDiscount" step="0.01" placeholder="0.00" min="0">
+        </div>
+        <div class="result-field">
+          <label>ราคาสุทธิ (฿)</label>
+          <input type="number" id="resultNetCost" step="0.01" placeholder="0.00" readonly style="color:#22d3ee;background:#0f172a;">
+        </div>
+        <div class="result-field">
           <label>ราคาต่อ kWh (฿)</label>
           <input type="number" id="resultPricePerKwh" step="0.01" placeholder="0.00" readonly style="color:#22d3ee;background:#0f172a;">
         </div>
@@ -1444,6 +1452,7 @@
       setDefaultMonth();
       initFirebase();
       document.getElementById('resultCost').addEventListener('input', calcPricePerKwh);
+      document.getElementById('resultDiscount').addEventListener('input', calcPricePerKwh);
       document.getElementById('resultKwh').addEventListener('input', calcPricePerKwh);
     });
 
@@ -1704,9 +1713,14 @@
   "station": "ชื่อสถานีชาร์จ",
   "kwh": 0.00,
   "cost": 0.00,
+  "discount": 0.00,
   "duration_minutes": 0,
   "note": "ข้อมูลเพิ่มเติม เช่น ประเภทหัวชาร์จ, rate per kWh"
 }
+- cost = ค่าธรรมเนียมการชาร์จก่อนหักส่วนลด (ราคาเต็ม)
+- discount = ส่วนลดทั้งหมด (เป็นจำนวนเงินบวก เช่น ถ้าส่วนลด -40.66 ให้ใส่ 40.66)
+- ถ้าในสลิปมียอดที่ชำระ (ราคาสุทธิ) และส่วนลด ให้คำนวณ cost = ยอดที่ชำระ + ส่วนลด
+- ถ้าไม่มีส่วนลด ให้ discount = 0
 ถ้าไม่มีข้อมูลไหนให้ใส่ null สำหรับ string และ 0 สำหรับ number`
                   },
                   ...currentImagesBase64.map(imgBase64 => ({
@@ -1895,6 +1909,8 @@
       document.getElementById('resultStation').value = '';
       document.getElementById('resultKwh').value = '';
       document.getElementById('resultCost').value = '';
+      document.getElementById('resultDiscount').value = '';
+      document.getElementById('resultNetCost').value = '';
       document.getElementById('resultDuration').value = '';
       document.getElementById('resultNote').value = '';
       document.getElementById('resultPricePerKwh').value = '';
@@ -1923,6 +1939,7 @@
       document.getElementById('resultStation').value = data.station || '';
       document.getElementById('resultKwh').value = data.kwh || 0;
       document.getElementById('resultCost').value = data.cost || 0;
+      document.getElementById('resultDiscount').value = data.discount || 0;
       document.getElementById('resultDuration').value = data.duration_minutes || 0;
       document.getElementById('resultNote').value = data.note || '';
       document.getElementById('analysisResult').classList.add('show');
@@ -1931,8 +1948,11 @@
 
     function calcPricePerKwh() {
       const cost = parseFloat(document.getElementById('resultCost').value) || 0;
+      const discount = parseFloat(document.getElementById('resultDiscount').value) || 0;
+      const netCost = Math.max(0, cost - discount);
       const kwh = parseFloat(document.getElementById('resultKwh').value) || 0;
-      const price = kwh > 0 ? (cost / kwh).toFixed(2) : '0.00';
+      document.getElementById('resultNetCost').value = netCost.toFixed(2);
+      const price = kwh > 0 ? (netCost / kwh).toFixed(2) : '0.00';
       document.getElementById('resultPricePerKwh').value = price;
     }
 
@@ -1953,11 +1973,15 @@
       btn.textContent = 'กำลังบันทึก...';
 
       try {
+        const grossCost = parseFloat(document.getElementById('resultCost').value) || 0;
+        const discount = parseFloat(document.getElementById('resultDiscount').value) || 0;
+        const netCost = Math.max(0, grossCost - discount);
         const chargeData = {
           date: document.getElementById('resultDate').value,
           station: document.getElementById('resultStation').value,
           kwh: parseFloat(document.getElementById('resultKwh').value) || 0,
-          cost: parseFloat(document.getElementById('resultCost').value) || 0,
+          cost: netCost,
+          discount: discount,
           duration: parseInt(document.getElementById('resultDuration').value) || 0,
           note: document.getElementById('resultNote').value,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
