@@ -848,6 +848,67 @@
       margin-top: 2px;
     }
 
+    .station-expense-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 0.8rem;
+    }
+
+    .station-expense-table thead th {
+      color: #64748b;
+      font-weight: 600;
+      font-size: 0.7rem;
+      padding: 8px 6px;
+      text-align: left;
+      border-bottom: 1px solid #334155;
+    }
+
+    .station-expense-table thead th:not(:first-child) {
+      text-align: right;
+    }
+
+    .station-expense-table tbody td {
+      color: #e2e8f0;
+      padding: 8px 6px;
+      border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+    }
+
+    .station-expense-table tbody td:not(:first-child) {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .station-expense-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .station-expense-table tfoot td {
+      color: #f59e0b;
+      font-weight: 700;
+      padding: 10px 6px 4px;
+      border-top: 1px solid #334155;
+    }
+
+    .station-expense-table tfoot td:not(:first-child) {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .station-expense-label {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    .station-expense-empty {
+      color: #475569;
+      text-align: center;
+      padding: 20px 0;
+      font-size: 0.8rem;
+    }
+
     .donut-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1340,6 +1401,14 @@
                 <div class="value" id="monthCount">0</div>
                 <div class="unit">ครั้ง</div>
               </div>
+            </div>
+          </div>
+
+          <!-- Station Expense Table (by selected month) -->
+          <div id="stationExpenseContainer" style="margin-top: 12px;">
+            <div class="spending-card">
+              <div class="station-expense-label" id="stationExpenseLabel">ค่าใช้จ่ายแยกตามสถานี</div>
+              <div id="stationExpenseBody"></div>
             </div>
           </div>
         </div>
@@ -2411,6 +2480,47 @@
       document.getElementById('monthKwh').textContent = monthData.totalKwh.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       document.getElementById('monthCount').textContent = monthData.count;
       document.getElementById('monthNextBtn').disabled = monthOffset >= 0;
+
+      // Station expense table for selected month
+      buildStationExpenseTable(charges, monthRange.start, monthRange.end);
+    }
+
+    function buildStationExpenseTable(charges, start, end) {
+      const startStr = toLocalDateStr(start);
+      const endStr = toLocalDateStr(end);
+      const stationMap = {};
+
+      charges.forEach(c => {
+        if (!c.date || c.date < startStr || c.date > endStr) return;
+        const s = c.station || 'ไม่ระบุ';
+        if (!stationMap[s]) stationMap[s] = { cost: 0, kwh: 0, count: 0 };
+        stationMap[s].cost += (c.cost || 0);
+        stationMap[s].kwh += (c.kwh || 0);
+        stationMap[s].count++;
+      });
+
+      const body = document.getElementById('stationExpenseBody');
+      const entries = Object.entries(stationMap).sort((a, b) => b[1].cost - a[1].cost);
+
+      if (entries.length === 0) {
+        body.innerHTML = '<div class="station-expense-empty">ไม่มีข้อมูลในเดือนนี้</div>';
+        return;
+      }
+
+      const fmt = v => v.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const totalCost = entries.reduce((sum, e) => sum + e[1].cost, 0);
+      const totalKwh = entries.reduce((sum, e) => sum + e[1].kwh, 0);
+      const totalCount = entries.reduce((sum, e) => sum + e[1].count, 0);
+
+      let html = `<table class="station-expense-table">
+        <thead><tr><th>สถานี</th><th>ครั้ง</th><th>kWh</th><th>บาท</th></tr></thead><tbody>`;
+
+      entries.forEach(([name, d]) => {
+        html += `<tr><td>${name}</td><td>${d.count}</td><td>${fmt(d.kwh)}</td><td>${fmt(d.cost)}</td></tr>`;
+      });
+
+      html += `</tbody><tfoot><tr><td>รวม</td><td>${totalCount}</td><td>${fmt(totalKwh)}</td><td>${fmt(totalCost)}</td></tr></tfoot></table>`;
+      body.innerHTML = html;
     }
 
     function navWeek(dir) {
