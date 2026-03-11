@@ -495,6 +495,7 @@
       margin-bottom: 12px;
       border: 1px solid #334155;
       transition: all 0.3s;
+      overflow: hidden;
     }
 
     .charge-card:hover { border-color: #22d3ee; }
@@ -504,6 +505,7 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 10px;
+      min-width: 0;
     }
 
     .charge-card-header .date {
@@ -521,10 +523,12 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
+      min-width: 0;
     }
 
     .charge-detail {
       font-size: 0.8rem;
+      min-width: 0;
     }
 
     .charge-detail .detail-label {
@@ -534,6 +538,9 @@
     .charge-detail .detail-value {
       color: #cbd5e1;
       font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .charge-card-actions {
@@ -853,6 +860,7 @@
       border-collapse: collapse;
       margin-top: 12px;
       font-size: 0.8rem;
+      table-layout: fixed;
     }
 
     .station-expense-table thead th {
@@ -874,9 +882,17 @@
       border-bottom: 1px solid rgba(51, 65, 85, 0.5);
     }
 
+    .station-expense-table tbody td:first-child {
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     .station-expense-table tbody td:not(:first-child) {
       text-align: right;
       font-variant-numeric: tabular-nums;
+      white-space: nowrap;
     }
 
     .station-expense-table tbody tr:last-child td {
@@ -2132,7 +2148,7 @@
           <div class="charge-card-details">
             <div class="charge-detail">
               <div class="detail-label">สถานี</div>
-              <div class="detail-value">${escapeHtml(c.station || '-')}</div>
+              <div class="detail-value" title="${escapeHtml(c.station || '-')}">${escapeHtml(c.station || '-')}</div>
             </div>
             <div class="charge-detail">
               <div class="detail-label">พลังงาน</div>
@@ -2513,10 +2529,11 @@
       const totalCount = entries.reduce((sum, e) => sum + e[1].count, 0);
 
       let html = `<table class="station-expense-table">
+        <colgroup><col style="width:40%"><col style="width:15%"><col style="width:20%"><col style="width:25%"></colgroup>
         <thead><tr><th>สถานี</th><th>ครั้ง</th><th>kWh</th><th>บาท</th></tr></thead><tbody>`;
 
       entries.forEach(([name, d]) => {
-        html += `<tr><td>${name}</td><td>${d.count}</td><td>${fmt(d.kwh)}</td><td>${fmt(d.cost)}</td></tr>`;
+        html += `<tr><td title="${escapeHtml(name)}">${escapeHtml(name)}</td><td>${d.count}</td><td>${fmt(d.kwh)}</td><td>${fmt(d.cost)}</td></tr>`;
       });
 
       html += `</tbody><tfoot><tr><td>รวม</td><td>${totalCount}</td><td>${fmt(totalKwh)}</td><td>${fmt(totalCost)}</td></tr></tfoot></table>`;
